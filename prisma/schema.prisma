@@ -1,0 +1,127 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// ENUMS
+// ============================================
+
+enum Role {
+  OWNER
+  BRANCH_ADMIN
+  PRODUCTION_OPERATOR
+}
+
+enum OrderStatus {
+  PENDING
+  PRINTING
+  PRESSING
+  READY
+  COMPLETED
+}
+
+enum ItemType {
+  GARMENT
+  INK
+  FILM
+  POWDER
+}
+
+// ============================================
+// MODELS
+// ============================================
+
+model Branch {
+  id        String      @id @default(cuid())
+  name      String      @unique
+  location  String
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  users     User[]
+  inventory Inventory[]
+  orders    Order[]
+
+  @@map("branches")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(PRODUCTION_OPERATOR)
+  branchId  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  branch    Branch?  @relation(fields: [branchId], references: [id], onDelete: SetNull)
+
+  @@index([email])
+  @@index([branchId])
+  @@map("users")
+}
+
+model Inventory {
+  id                String    @id @default(cuid())
+  branchId          String
+  itemName          String
+  itemType          ItemType
+  stockQuantity     Float     @default(0)
+  unit              String    // pcs, ml, cm, kg
+  lowStockThreshold Float     @default(10)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  branch            Branch    @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  orderItems        OrderItem[]
+
+  @@unique([branchId, itemName])
+  @@index([branchId])
+  @@index([itemType])
+  @@map("inventory")
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  orderNumber     String      @unique
+  branchId        String
+  customerName    String
+  customerPhone   String
+  designFilePath  String?
+  status          OrderStatus @default(PENDING)
+  totalPrice      Float       @default(0)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  branch          Branch      @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  orderItems      OrderItem[]
+
+  @@index([branchId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([orderNumber])
+  @@map("orders")
+}
+
+model OrderItem {
+  id          String    @id @default(cuid())
+  orderId     String
+  inventoryId String
+  quantity    Int
+  price       Float
+  printSize   String    @default("A3") // A3, A4
+  createdAt   DateTime  @default(now())
+
+  order       Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  inventory   Inventory @relation(fields: [inventoryId], references: [id], onDelete: Restrict)
+
+  @@index([orderId])
+  @@index([inventoryId])
+  @@map("order_items")
+}
