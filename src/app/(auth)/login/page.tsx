@@ -36,9 +36,9 @@ export default function LoginPage() {
         // 2. Jika tujuan pengalihan adalah default (/pos), bagi rutenya berdasarkan role
         if (callbackUrl === "/pos") {
           if (role === "OWNER") {
-            router.push("/dashboard");
+            router.push("/owner");
           } else if (role === "PRODUCTION_OPERATOR") {
-            router.push("/production"); // ⚠️ SESUAIKAN dengan nama folder halaman produksi milikmu (misal: /produksi atau /production)
+            router.push("/production");
           } else {
             router.push("/pos");       // ADMIN / KASIR tetap ke halaman POS
           }
