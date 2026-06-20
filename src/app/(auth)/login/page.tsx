@@ -87,13 +87,12 @@ export default function LoginPage() {
                 style={{ animationDelay: `${i * 0.15}s` }}
               >
                 <div
-                  className={`w-3 h-3 rounded-full ${
-                    i === 0
+                  className={`w-3 h-3 rounded-full ${i === 0
                       ? "bg-indigo-400"
                       : i === 1
-                      ? "bg-emerald-400"
-                      : "bg-amber-400"
-                  }`}
+                        ? "bg-emerald-400"
+                        : "bg-amber-400"
+                    }`}
                 />
                 <span className="text-sm text-slate-300 font-medium">
                   Cabang {branch}
@@ -225,11 +224,11 @@ export default function LoginPage() {
               </div>
               <div className="flex justify-between">
                 <span>Admin:</span>
-                <code className="text-foreground">admin.pwk@adakaos.com / password123</code>
+                <code className="text-foreground">admin.purwakarta@adakaos.com / password123</code>
               </div>
               <div className="flex justify-between">
                 <span>Operator:</span>
-                <code className="text-foreground">operator.pwk@adakaos.com / password123</code>
+                <code className="text-foreground">operator.purwakarta@adakaos.com / password123</code>
               </div>
             </div>
           </div>
