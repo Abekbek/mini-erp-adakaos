@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { signIn, getSession } from "next-auth/react"; // Tambahkan getSession di sini
 import { useRouter, useSearchParams } from "next/navigation";
 
 export default function LoginPage() {
@@ -29,7 +29,24 @@ export default function LoginPage() {
       if (result?.error) {
         setError("Email atau password salah. Silakan coba lagi.");
       } else {
-        router.push(callbackUrl);
+        // 1. Ambil data sesi aktif yang baru saja terbuat
+        const session = await getSession();
+        const role = session?.user?.role;
+
+        // 2. Jika tujuan pengalihan adalah default (/pos), bagi rutenya berdasarkan role
+        if (callbackUrl === "/pos") {
+          if (role === "OWNER") {
+            router.push("/dashboard");
+          } else if (role === "PRODUCTION_OPERATOR") {
+            router.push("/production"); // ⚠️ SESUAIKAN dengan nama folder halaman produksi milikmu (misal: /produksi atau /production)
+          } else {
+            router.push("/pos");       // ADMIN / KASIR tetap ke halaman POS
+          }
+        } else {
+          // Jika user awalnya mencoba mengakses halaman spesifik, biarkan mereka menuju ke sana
+          router.push(callbackUrl);
+        }
+
         router.refresh();
       }
     } catch {
@@ -43,14 +60,12 @@ export default function LoginPage() {
     <div className="min-h-screen flex">
       {/* Left Panel - Branding */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 relative overflow-hidden">
-        {/* Decorative elements */}
         <div className="absolute inset-0">
           <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-primary/20 rounded-full blur-3xl" />
           <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-indigo-500/10 rounded-full blur-2xl" />
         </div>
 
-        {/* Grid pattern */}
         <div
           className="absolute inset-0 opacity-[0.03]"
           style={{
@@ -78,7 +93,6 @@ export default function LoginPage() {
             </p>
           </div>
 
-          {/* Branch indicators */}
           <div className="flex flex-col gap-3">
             {["Purwakarta", "Karawang", "Cikampek"].map((branch, i) => (
               <div
@@ -88,10 +102,10 @@ export default function LoginPage() {
               >
                 <div
                   className={`w-3 h-3 rounded-full ${i === 0
-                      ? "bg-indigo-400"
-                      : i === 1
-                        ? "bg-emerald-400"
-                        : "bg-amber-400"
+                    ? "bg-indigo-400"
+                    : i === 1
+                      ? "bg-emerald-400"
+                      : "bg-amber-400"
                     }`}
                 />
                 <span className="text-sm text-slate-300 font-medium">
@@ -107,7 +121,6 @@ export default function LoginPage() {
       {/* Right Panel - Login Form */}
       <div className="flex-1 flex items-center justify-center p-8 bg-background">
         <div className="w-full max-w-md">
-          {/* Mobile logo */}
           <div className="lg:hidden mb-10 text-center">
             <h1 className="text-3xl font-bold">
               <span className="gradient-text">Adakaos</span>
