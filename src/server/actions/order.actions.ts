@@ -53,7 +53,9 @@ export async function createOrder(
       if (file && file.size > 0) {
         const ext = path.extname(file.name) || ".png";
         const safeName = `${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`;
-        const uploadDir = path.join(process.cwd(), "public", "uploads", "designs");
+        const uploadDir = process.env.NODE_ENV === "production" 
+          ? "/tmp" 
+          : path.join(process.cwd(), "public", "uploads", "designs");
 
         await mkdir(uploadDir, { recursive: true });
 
@@ -61,7 +63,10 @@ export async function createOrder(
         const buffer = Buffer.from(bytes);
         await writeFile(path.join(uploadDir, safeName), buffer);
 
-        designFilePath = `/uploads/designs/${safeName}`;
+        // Path yang disimpan ke database tetap menyesuaikan agar setidaknya tidak error
+        designFilePath = process.env.NODE_ENV === "production"
+          ? `/tmp/${safeName}`
+          : `/uploads/designs/${safeName}`;
       }
     }
 
