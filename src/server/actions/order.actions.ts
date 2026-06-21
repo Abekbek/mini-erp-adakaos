@@ -193,6 +193,9 @@ export async function createOrder(
         }));
 
       return { order, stockAlerts };
+    }, {
+      maxWait: 10000,
+      timeout: 20000
     });
 
     revalidatePath("/pos");
